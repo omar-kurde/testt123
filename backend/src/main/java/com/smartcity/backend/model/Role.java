@@ -1,4 +1,6 @@
 package com.smartcity.backend.model;
 
-public class dummy4 {
+public enum Role {
+    USER,
+    ADMIN,
 }

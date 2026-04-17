@@ -6,8 +6,8 @@ services:
     container_name: smartcity-postgres
     environment:
       POSTGRES_DB: smartcity
-      POSTGRES_USER: smartcity_user
-      POSTGRES_PASSWORD: smartcity2026
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: wadea1234
     ports:
       - "5432:5432"
     volumes:

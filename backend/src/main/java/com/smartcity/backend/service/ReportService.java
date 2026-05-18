@@ -8,16 +8,19 @@ import com.smartcity.backend.enums.VoteType;
 import com.smartcity.backend.exception.ReportNotFoundException;
 import com.smartcity.backend.exception.TooManyRequestsException;
 import com.smartcity.backend.model.Report;
+import com.smartcity.backend.model.ReportH3;
 import com.smartcity.backend.model.UserVote;
 import com.smartcity.backend.repository.ReportRepository;
 import com.smartcity.backend.repository.UserVoteRepository;
 import com.uber.h3core.util.LatLng;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ public class ReportService {
     private final ReportRepository   reportRepository;
     private final UserVoteRepository userVoteRepository;
     private final H3ReportService h3ReportService;
+
     private final H3CoreService h3CoreService;
     private final AiService aiService;
 
@@ -87,15 +91,10 @@ public class ReportService {
     // READ
     // =========================================================================
     public List<ReportSummary> getAllReportsSummaryInViewPort(double northLat, double northLng, double southLat, double southLng, int zoom) {
-        List<ReportSummary> result = new ArrayList<>();
         List<Long> cells = h3CoreService.getCellsInViewport(northLat, northLng, southLat, southLng, zoom);
-        for (Long cell : cells) {
-            Long count = h3ReportService.CountReports(cell);
-            if (count == 0)continue;
-            LatLng latLng = h3CoreService.getCenter(cell);
-            result.add(new ReportSummary(latLng, count));
-        }
-        return result;
+        System.out.println(cells.size());
+        Map<Long,Long> temp = h3ReportService.countReports(cells);
+        return temp.entrySet().stream().map(e-> new ReportSummary(h3CoreService.getCenter(e.getKey()), e.getValue())).toList();
     }
 
     public List<ReportResponse> getAllReports() {
@@ -354,4 +353,6 @@ public class ReportService {
                 .orElseThrow(() -> new ReportNotFoundException(
                         "Report not found with id: " + reportId));
     }
+
+
 }
